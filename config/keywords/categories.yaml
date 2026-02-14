@@ -1,0 +1,71 @@
+# ==============================================================================
+# Master Category Index
+# Autonomous Document Intel Engine
+# ==============================================================================
+#
+# This file is the single source of truth for all document categories.
+# Each entry references an individual YAML keyword dictionary.
+#
+# Scoring formula used by the keyword engine:
+#   raw_score  = (primary_matches * primary_weight) + (secondary_matches * secondary_weight)
+#   max_score  = (total_primary * primary_weight) + (total_secondary * secondary_weight)
+#   confidence = raw_score / max_score
+#
+#   Exclusion penalty:
+#     If any exclusion_keyword is found in the document:
+#       confidence *= 0.30   (heavy penalty — rarely classifies above threshold)
+#
+#   Minimum primary guard:
+#     If primary_matches < min_primary_matches:
+#       confidence = 0.0     (hard disqualification)
+#
+# When confidence < category.confidence_threshold  →  LLM fallback is triggered.
+# ==============================================================================
+
+version: "1.0"
+last_updated: "2026-02-14"
+
+scoring_strategy: weighted_ratio   # Only supported strategy in Phase 1
+
+categories:
+  - category: invoice
+    display_name: Invoice
+    file: invoice.yaml
+    enabled: true
+    priority: 1    # Lower number = evaluated first (most common doc type)
+
+  - category: purchase_order
+    display_name: Purchase Order
+    file: purchase_order.yaml
+    enabled: true
+    priority: 2
+
+  - category: receipt
+    display_name: Receipt
+    file: receipt.yaml
+    enabled: true
+    priority: 3
+
+  - category: contract
+    display_name: Contract / Agreement
+    file: contract.yaml
+    enabled: true
+    priority: 4
+
+  - category: bank_statement
+    display_name: Bank Statement
+    file: bank_statement.yaml
+    enabled: true
+    priority: 5
+
+  - category: report
+    display_name: Business / Technical Report
+    file: report.yaml
+    enabled: true
+    priority: 6
+
+  - category: resume
+    display_name: Resume / CV
+    file: resume.yaml
+    enabled: true
+    priority: 7

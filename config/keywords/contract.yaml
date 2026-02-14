@@ -1,0 +1,176 @@
+# ==============================================================================
+# Keyword Dictionary: Contract / Agreement
+# ==============================================================================
+# Legally binding document establishing rights, obligations, and terms
+# between two or more parties.
+#
+# Covers: Service agreements, NDAs, employment contracts, vendor contracts,
+#         SLAs, licensing agreements, lease agreements, partnership agreements.
+# Does NOT cover: Purchase Orders (commercial, not typically bilateral contract),
+#                 Reports, Policies (internal, non-binding).
+# ==============================================================================
+
+category: contract
+display_name: Contract / Agreement
+description: >
+  Legally binding document establishing mutual obligations, rights, and
+  terms between two or more named parties, with defined effective dates
+  and termination provisions.
+
+confidence_threshold: 0.55  # Slightly lower: legal language can overlap with policies/reports
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 3  # Higher bar — legal documents need strong multi-keyword signal
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - agreement
+  - contract
+  - this agreement
+  - parties
+  - effective date
+  - term
+  - termination
+  - governing law
+  - in witness whereof
+  - whereas
+  - now therefore
+  - hereinafter
+  - party of the first part
+  - party of the second part
+  - representations and warranties
+  - indemnification
+  - force majeure
+  - dispute resolution
+  - entire agreement
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - confidentiality
+  - non-disclosure
+  - nda
+  - intellectual property
+  - ip ownership
+  - assignment
+  - liability
+  - limitation of liability
+  - warranties
+  - representations
+  - amendment
+  - addendum
+  - exhibit
+  - schedule
+  - appendix
+  - jurisdiction
+  - arbitration
+  - mediation
+  - severability
+  - waiver
+  - notice
+  - counterparts
+  - signature
+  - executed
+  - authorized signatory
+  - seal
+  - notary
+  - renewal
+  - extension
+  - breach
+  - remedy
+  - damages
+  - injunctive relief
+  - service level
+  - sla
+  - scope of work
+  - statement of work
+  - sow
+  - deliverables
+  - compensation
+  - fees
+  - payment schedule
+  - milestones
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - purchase order
+  - invoice
+  - invoice number
+  - payment received
+  - receipt
+  - resume
+  - curriculum vitae
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  contract_title:
+    description: Title of the agreement (usually first heading or bold text)
+    pattern: '(?i)^([A-Z][A-Z\s&,\-/]{5,120}(?:AGREEMENT|CONTRACT|NDA|DEED|LICENSE|LICENCE|SLA|ARRANGEMENT))'
+    group: 1
+
+  effective_date:
+    description: Date the agreement comes into force
+    pattern: >-
+      (?i)(?:effective\s*(?:as\s*of\s*)?date|commencement\s*date|start\s*date)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}|
+       (?:the\s+)?\d{1,2}(?:st|nd|rd|th)?\s+(?:day\s+of\s+)?(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?,?\s+\d{4})
+    group: 1
+
+  termination_date:
+    description: Date the agreement expires or terminates
+    pattern: >-
+      (?i)(?:termination\s*date|expiry\s*date|expiration\s*date|end\s*date|expires?\s*on)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})
+    group: 1
+
+  party_one:
+    description: First named party (company or individual)
+    pattern: '(?i)(?:between|party\s*(?:of\s*the\s*first\s*part|1|one|a)[\s:,]*)([A-Z][A-Za-z0-9\s,\.&\-]{2,100}(?:Ltd|LLC|Inc|Corp|GmbH|Pvt|Co\.?|LP|LLP)?)'
+    group: 1
+
+  party_two:
+    description: Second named party
+    pattern: '(?i)(?:and\s+|party\s*(?:of\s*the\s*second\s*part|2|two|b)[\s:,]*)([A-Z][A-Za-z0-9\s,\.&\-]{2,100}(?:Ltd|LLC|Inc|Corp|GmbH|Pvt|Co\.?|LP|LLP)?)'
+    group: 1
+
+  governing_law:
+    description: Jurisdiction / governing law
+    pattern: '(?i)(?:governed\s*by|governing\s*law|laws?\s*of\s*(?:the\s*)?)([A-Za-z\s,]{3,60})'
+    group: 1
+
+  contract_value:
+    description: Total contract value or fee (if stated)
+    pattern: '(?i)(?:total\s*(?:contract\s*)?value|contract\s*price|total\s*fees?|total\s*compensation)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - effective_date
+  - party_one
+  - party_two
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - contract_title
+  - termination_date
+  - governing_law
+  - contract_value

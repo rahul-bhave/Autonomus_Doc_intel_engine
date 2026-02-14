@@ -1,0 +1,169 @@
+# ==============================================================================
+# Keyword Dictionary: Business / Technical Report
+# ==============================================================================
+# Structured analytical document presenting findings, analysis, and
+# recommendations on a defined subject, prepared by or for an organisation.
+#
+# Covers: Financial reports, project status reports, audit reports,
+#         technical assessment reports, incident reports, research reports.
+# Does NOT cover: Contracts/Agreements (binding), Invoices (transactional),
+#                 Resumes (personal), Policies (directive, not analytical).
+# ==============================================================================
+
+category: report
+display_name: Business / Technical Report
+description: >
+  Structured analytical document presenting findings, data analysis,
+  and recommendations prepared for an organisation or stakeholder.
+
+confidence_threshold: 0.50  # Lower threshold: report language appears in many document types
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 3  # Needs strong multi-keyword signal to avoid false positives
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - report
+  - executive summary
+  - findings
+  - recommendations
+  - methodology
+  - conclusion
+  - analysis
+  - prepared by
+  - prepared for
+  - submitted by
+  - submitted to
+  - date of report
+  - report date
+  - report number
+  - report id
+  - scope
+  - objective
+  - background
+  - overview
+  - key findings
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - quarterly report
+  - annual report
+  - monthly report
+  - status report
+  - progress report
+  - audit report
+  - incident report
+  - feasibility study
+  - risk assessment
+  - market analysis
+  - financial summary
+  - performance review
+  - kpi
+  - key performance indicator
+  - metrics
+  - data analysis
+  - trend
+  - forecast
+  - projection
+  - variance
+  - benchmark
+  - table of contents
+  - list of figures
+  - list of tables
+  - appendix
+  - glossary
+  - references
+  - bibliography
+  - limitations
+  - assumptions
+  - stakeholders
+  - fiscal year
+  - quarter
+  - period
+  - year to date
+  - ytd
+  - action items
+  - next steps
+  - risk
+  - mitigation
+  - observations
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - invoice
+  - invoice number
+  - purchase order
+  - in witness whereof
+  - resume
+  - curriculum vitae
+  - account statement
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  report_title:
+    description: Title of the report
+    pattern: '(?i)^([A-Z][A-Za-z0-9\s\-:,/&]{5,150}(?:Report|Analysis|Assessment|Review|Study|Summary|Audit|Findings))'
+    group: 1
+
+  report_number:
+    description: Report reference / document number
+    pattern: '(?i)(?:report\s*(?:number|no\.?|#|id|ref\.?)|document\s*(?:number|no\.?|#|id))[\s:]*([\w\-/]{2,30})'
+    group: 1
+
+  report_date:
+    description: Date the report was issued or submitted
+    pattern: >-
+      (?i)(?:report\s*date|date\s*of\s*report|issued\s*(?:on|date)|prepared\s*(?:on|date)|submitted\s*(?:on|date))[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  prepared_by:
+    description: Author or team that prepared the report
+    pattern: '(?i)(?:prepared\s*by|authored\s*by|written\s*by|submitted\s*by)[\s:]*([A-Za-z][A-Za-z0-9\s,\.&\-]{2,100})'
+    group: 1
+
+  prepared_for:
+    description: Intended recipient or client
+    pattern: '(?i)(?:prepared\s*for|submitted\s*to|addressed\s*to|attention[\s:]+)([A-Za-z][A-Za-z0-9\s,\.&\-]{2,100})'
+    group: 1
+
+  report_period:
+    description: Time period the report covers (e.g., Q1 2025, FY2024)
+    pattern: '(?i)(?:for\s*(?:the\s*)?(?:period|quarter|year|month)|reporting\s*period|fiscal\s*year|fy|q[1-4])[\s:]*([A-Za-z0-9\s\-/,]{2,40})'
+    group: 1
+
+  version:
+    description: Document version number
+    pattern: '(?i)(?:version|ver\.?|rev\.?|revision)[\s:]*([0-9]+(?:\.[0-9]+)*(?:\s*[a-z])?)'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - report_date
+  - prepared_by
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - report_title
+  - report_number
+  - prepared_for
+  - report_period
+  - version

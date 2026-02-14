@@ -1,0 +1,179 @@
+# ==============================================================================
+# Keyword Dictionary: Bank Statement
+# ==============================================================================
+# Official periodic financial statement issued by a bank or financial institution
+# to an account holder, listing all transactions within a statement period.
+#
+# Covers: Checking/current account statements, savings account statements,
+#         credit card statements, loan account statements.
+# Does NOT cover: Invoices, Receipts, Financial Reports (analytical).
+# ==============================================================================
+
+category: bank_statement
+display_name: Bank Statement
+description: >
+  Official periodic statement from a bank or financial institution showing
+  account transactions, balances, and statement period for a named account holder.
+
+confidence_threshold: 0.65  # High threshold: vocabulary is very distinctive
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 3
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - account statement
+  - statement of account
+  - bank statement
+  - statement period
+  - opening balance
+  - closing balance
+  - account number
+  - account holder
+  - deposits
+  - withdrawals
+  - debit
+  - credit
+  - available balance
+  - current balance
+  - ledger balance
+  - transactions
+  - transaction date
+  - description
+  - reference number
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - bank
+  - branch
+  - sort code
+  - routing number
+  - iban
+  - swift code
+  - bic
+  - bsb number
+  - ifsc
+  - savings account
+  - checking account
+  - current account
+  - credit card
+  - minimum payment
+  - interest charged
+  - interest earned
+  - annual percentage rate
+  - apr
+  - overdraft
+  - overdraft limit
+  - funds transfer
+  - direct deposit
+  - direct debit
+  - standing order
+  - eft
+  - atm
+  - atm withdrawal
+  - pos
+  - point of sale
+  - wire transfer
+  - ach
+  - online banking
+  - total deposits
+  - total withdrawals
+  - net change
+  - brought forward
+  - carried forward
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - invoice
+  - invoice number
+  - purchase order
+  - resume
+  - curriculum vitae
+  - this agreement
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  account_number:
+    description: Bank account number (masked or full)
+    pattern: '(?i)(?:account\s*(?:number|no\.?|#))[\s:]*([X\*\d][\d\sX\*\-]{4,30})'
+    group: 1
+
+  account_holder:
+    description: Name of the account holder
+    pattern: '(?i)(?:account\s*(?:holder|name)|account\s*(?:holder|name)|customer\s*name)[\s:]*([A-Z][A-Za-z\s\.\-]{2,60})'
+    group: 1
+
+  statement_period_start:
+    description: Statement period start date
+    pattern: >-
+      (?i)(?:statement\s*(?:period|from)|from\s*date|period\s*from)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  statement_period_end:
+    description: Statement period end date
+    pattern: >-
+      (?i)(?:to\s*date|period\s*to|through|ending|as\s*of)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  opening_balance:
+    description: Balance at start of statement period
+    pattern: '(?i)(?:opening\s*balance|beginning\s*balance|balance\s*brought\s*forward|b/f)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  closing_balance:
+    description: Balance at end of statement period
+    pattern: '(?i)(?:closing\s*balance|ending\s*balance|balance\s*carried\s*forward|c/f|available\s*balance)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  bank_name:
+    description: Name of the issuing bank
+    pattern: '(?i)(?:^|issued\s*by\s*)([A-Z][A-Za-z\s&\-]{3,60}(?:Bank|Credit\s*Union|Financial|Savings|Trust|N\.A\.|PLC|Ltd)?)'
+    group: 1
+
+  total_deposits:
+    description: Total deposits / credits in the period
+    pattern: '(?i)(?:total\s*(?:deposits|credits|credited))[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  total_withdrawals:
+    description: Total withdrawals / debits in the period
+    pattern: '(?i)(?:total\s*(?:withdrawals|debits|debited|payments))[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - account_number
+  - statement_period_start
+  - statement_period_end
+  - closing_balance
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - account_holder
+  - opening_balance
+  - bank_name
+  - total_deposits
+  - total_withdrawals

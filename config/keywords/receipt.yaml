@@ -1,0 +1,174 @@
+# ==============================================================================
+# Keyword Dictionary: Receipt
+# ==============================================================================
+# Proof-of-payment document issued to the buyer after a transaction is
+# completed, confirming that payment has been received.
+#
+# Covers: Point-of-sale receipts, e-commerce receipts, payment confirmation
+#         emails, online transaction receipts, expense receipts.
+# Does NOT cover: Invoices (payment requested, not yet received),
+#                 Purchase Orders (authorization to buy, not proof of payment).
+# ==============================================================================
+
+category: receipt
+display_name: Receipt
+description: >
+  Proof-of-payment document confirming that a transaction has been completed
+  and funds have been received by the merchant or service provider.
+
+confidence_threshold: 0.65
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 2
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - receipt
+  - payment received
+  - paid
+  - thank you for your purchase
+  - thank you for your payment
+  - transaction id
+  - transaction number
+  - transaction complete
+  - order confirmation
+  - payment confirmation
+  - sale confirmed
+  - amount paid
+  - total paid
+  - your order has been placed
+  - your payment has been processed
+  - cash received
+  - change given
+  - change due
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - store
+  - merchant
+  - cashier
+  - register
+  - till
+  - pos
+  - terminal id
+  - authorization code
+  - approval code
+  - card number
+  - last 4 digits
+  - visa
+  - mastercard
+  - amex
+  - american express
+  - debit card
+  - credit card
+  - contactless
+  - cash
+  - cheque
+  - check
+  - reference number
+  - loyalty points
+  - reward points
+  - return policy
+  - exchange policy
+  - no refund
+  - keep this receipt
+  - tax included
+  - tax collected
+  - subtotal
+  - discount applied
+  - coupon
+  - promo code
+  - items purchased
+  - qty
+  - unit price
+  - item total
+  - grand total
+  - served by
+  - table number
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - amount due
+  - payment due
+  - due date
+  - please pay
+  - remit to
+  - invoice
+  - purchase order
+  - this agreement
+  - resume
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  receipt_number:
+    description: Receipt or transaction number
+    pattern: '(?i)(?:receipt\s*(?:number|no\.?|#)|transaction\s*(?:id|number|no\.?|#)|order\s*(?:number|no\.?|#|id))[\s:]*([\w\-/]{3,30})'
+    group: 1
+
+  transaction_date:
+    description: Date and time of transaction
+    pattern: >-
+      (?i)(?:date|transaction\s*date|purchase\s*date|sale\s*date)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}(?:\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AP]M)?)?|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}(?:\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AP]M)?)?|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})
+    group: 1
+
+  total_amount:
+    description: Total amount paid
+    pattern: '(?i)(?:total\s*paid|amount\s*paid|grand\s*total|total\s*(?:amount)?|you\s*paid)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  payment_method:
+    description: Method of payment used
+    pattern: '(?i)(cash|credit\s*card|debit\s*card|cheque|check|bank\s*transfer|contactless|visa|mastercard|amex|american\s*express|paypal|upi|neft|rtgs|imps)'
+    group: 1
+
+  merchant_name:
+    description: Name of the merchant / store
+    pattern: '(?i)(?:^|store[\s:]+|merchant[\s:]+|sold\s*by[\s:]+)([A-Z][A-Za-z0-9\s,\.&\-'']{2,80})'
+    group: 1
+
+  tax_amount:
+    description: Tax collected (GST / VAT / Sales Tax)
+    pattern: '(?i)(?:tax|gst|vat|hst|pst|sales\s*tax)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  authorization_code:
+    description: Card authorization / approval code
+    pattern: '(?i)(?:auth(?:orization)?\s*(?:code|number|#)|approval\s*code)[\s:]*([\w\d]{4,12})'
+    group: 1
+
+  cashier_name:
+    description: Name of cashier or served by
+    pattern: '(?i)(?:cashier|served\s*by|assistant|operator)[\s:]*([A-Za-z][A-Za-z\s\.\-]{1,40})'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - receipt_number
+  - transaction_date
+  - total_amount
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - payment_method
+  - merchant_name
+  - tax_amount
+  - authorization_code
+  - cashier_name

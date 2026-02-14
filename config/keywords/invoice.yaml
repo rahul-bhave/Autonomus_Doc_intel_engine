@@ -1,0 +1,197 @@
+# ==============================================================================
+# Keyword Dictionary: Invoice
+# ==============================================================================
+# Commercial billing document issued by a vendor/supplier to a buyer,
+# requesting payment for goods or services rendered.
+#
+# Covers: Standard invoices, tax invoices, commercial invoices, e-invoices.
+# Does NOT cover: Receipts (payment already made), Proforma invoices (no obligation),
+#                 Purchase Orders (buyer-issued request to buy).
+# ==============================================================================
+
+category: invoice
+display_name: Invoice
+description: >
+  Commercial billing document from vendor to buyer requesting payment for
+  goods or services. Payment is due (not yet received at time of issue).
+
+confidence_threshold: 0.60
+
+scoring:
+  primary_weight: 2       # Each primary keyword match contributes 2 points
+  secondary_weight: 1     # Each secondary keyword match contributes 1 point
+  min_primary_matches: 2  # Minimum primary matches required; below this → confidence = 0.0
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# High-signal terms that strongly indicate an Invoice.
+# Case-insensitive matching assumed by the engine.
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - invoice
+  - invoice number
+  - invoice no
+  - inv no
+  - invoice date
+  - bill to
+  - billed to
+  - due date
+  - payment due
+  - amount due
+  - total amount
+  - total due
+  - balance due
+  - remit to
+  - remittance
+  - please remit
+  - tax invoice
+  - vat invoice
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# Supporting evidence; individually insufficient but raise confidence when
+# combined with primary matches.
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - vendor
+  - supplier
+  - account number
+  - purchase order
+  - po number
+  - po #
+  - payment terms
+  - net 30
+  - net 60
+  - net 90
+  - upon receipt
+  - quantity
+  - unit price
+  - unit cost
+  - line item
+  - line items
+  - item description
+  - subtotal
+  - sub-total
+  - freight
+  - shipping charges
+  - handling
+  - discount
+  - tax rate
+  - gst
+  - vat
+  - hst
+  - pst
+  - sales tax
+  - bank transfer
+  - ach
+  - wire transfer
+  - iban
+  - swift
+  - beneficiary
+  - please pay
+  - overdue
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# If any of these appear, confidence is multiplied by 0.30.
+# Used to prevent misclassifying Receipts or Proforma Invoices.
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - payment received
+  - paid in full
+  - this is a receipt
+  - proforma
+  - pro forma
+  - quotation
+  - quote
+  - estimate
+  - not a tax invoice
+
+# ---------------------------------------------------------------------------
+# Regex Patterns for Metadata Extraction
+# Each entry: label + pattern + named group used for extraction.
+# Applied after keyword classification confirms this is an Invoice.
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  invoice_number:
+    description: Invoice identifier / reference number
+    pattern: '(?i)(?:invoice\s*(?:number|no\.?|#|num\.?|ref\.?)[\s:]*)([\w\-/]{2,30})'
+    group: 1
+
+  invoice_date:
+    description: Date the invoice was issued
+    pattern: >-
+      (?i)(?:invoice\s*date|date\s*of\s*invoice|issue\s*date)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  due_date:
+    description: Payment due date
+    pattern: >-
+      (?i)(?:due\s*date|payment\s*due(?:\s*date)?|pay\s*by|payable\s*by)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  total_amount:
+    description: Total amount payable (currency-agnostic, captures numeric value)
+    pattern: '(?i)(?:total\s*(?:amount|due|payable)|amount\s*due|balance\s*due|grand\s*total)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  currency_symbol:
+    description: Currency symbol found near total
+    pattern: '(?i)(?:total\s*(?:amount|due|payable)|amount\s*due)[\s:]*([£$€₹¥₩])'
+    group: 1
+
+  subtotal:
+    description: Pre-tax subtotal
+    pattern: '(?i)(?:sub[-\s]?total)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  tax_amount:
+    description: Tax amount (GST / VAT / Sales Tax)
+    pattern: '(?i)(?:tax|gst|vat|hst|pst|sales\s*tax)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  po_reference:
+    description: Buyer's Purchase Order reference
+    pattern: '(?i)(?:p\.?o\.?\s*(?:number|no\.?|#)|purchase\s*order\s*(?:number|no\.?|#)?)[\s:]*([\w\-/]{2,20})'
+    group: 1
+
+  vendor_name:
+    description: Name of the issuing vendor/supplier
+    pattern: '(?i)(?:^|from[\s:]+|vendor[\s:]+|supplier[\s:]+|billed?\s*by[\s:]+)([A-Z][A-Za-z0-9\s,\.&\-]{2,80}(?:Ltd|LLC|Inc|Corp|GmbH|Pvt|Co\.?)?)'
+    group: 1
+
+  payment_terms:
+    description: Payment terms (e.g., Net 30)
+    pattern: '(?i)(?:payment\s*terms?|terms?)[\s:]*([A-Za-z0-9\s/\-]{2,40})'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# Pipeline sets validation_status = "partial" if any of these are absent.
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - invoice_number
+  - invoice_date
+  - total_amount
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# Extracted when present; absence does not affect validation_status.
+# ---------------------------------------------------------------------------
+optional_fields:
+  - due_date
+  - subtotal
+  - tax_amount
+  - po_reference
+  - vendor_name
+  - payment_terms
+  - currency_symbol

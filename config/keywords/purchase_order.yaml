@@ -1,0 +1,172 @@
+# ==============================================================================
+# Keyword Dictionary: Purchase Order
+# ==============================================================================
+# Buyer-issued authorization document instructing a vendor to supply goods
+# or services at agreed terms. Precedes an invoice in the procurement cycle.
+#
+# Covers: Standard POs, blanket POs, release orders, procurement orders.
+# Does NOT cover: Invoices (vendor-issued, payment request),
+#                 Receipts (proof of payment), Contracts (legal agreement).
+# ==============================================================================
+
+category: purchase_order
+display_name: Purchase Order
+description: >
+  Buyer-issued commercial document authorizing a vendor to supply specified
+  goods or services at agreed quantities, prices, and delivery terms.
+
+confidence_threshold: 0.60
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 2
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - purchase order
+  - po number
+  - po #
+  - po no
+  - p.o. number
+  - p.o.#
+  - order number
+  - order date
+  - ship to
+  - deliver to
+  - delivery address
+  - ordered by
+  - approved by
+  - requisition number
+  - requisition no
+  - buyer
+  - procurement
+  - order confirmation
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - vendor
+  - supplier
+  - item number
+  - part number
+  - sku
+  - description
+  - quantity
+  - unit of measure
+  - uom
+  - unit price
+  - extended price
+  - line total
+  - subtotal
+  - total value
+  - shipping terms
+  - fob
+  - incoterms
+  - delivery date
+  - required date
+  - promised date
+  - payment terms
+  - net 30
+  - net 60
+  - billing address
+  - contact person
+  - phone
+  - email
+  - warehouse
+  - receiving
+  - goods receipt
+  - blanket order
+  - release number
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - invoice
+  - invoice number
+  - amount due
+  - payment received
+  - receipt
+  - this is not a purchase order
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  po_number:
+    description: Purchase Order number / identifier
+    pattern: '(?i)(?:p\.?o\.?\s*(?:number|no\.?|#|num\.?)|purchase\s*order\s*(?:number|no\.?|#)?)[\s:]*([\w\-/]{2,25})'
+    group: 1
+
+  order_date:
+    description: Date the PO was issued
+    pattern: >-
+      (?i)(?:order\s*date|date\s*of\s*order|po\s*date|issued\s*date)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4}|
+       \d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})
+    group: 1
+
+  delivery_date:
+    description: Required or promised delivery date
+    pattern: >-
+      (?i)(?:delivery\s*date|required\s*date|ship\s*by|deliver\s*by|promised\s*date)[\s:]*
+      (\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}|
+       \d{4}[\/\-\.]\d{1,2}[\/\-\.]\d{1,2}|
+       (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})
+    group: 1
+
+  total_value:
+    description: Total order value
+    pattern: '(?i)(?:total\s*(?:value|amount|order|price)|order\s*total|grand\s*total)[\s:]*(?:[£$€₹¥₩]?\s*)([\d,]+(?:\.\d{1,2})?)'
+    group: 1
+
+  vendor_name:
+    description: Vendor / supplier name
+    pattern: '(?i)(?:vendor[\s:]+|supplier[\s:]+|to[\s:]+)([A-Z][A-Za-z0-9\s,\.&\-]{2,80}(?:Ltd|LLC|Inc|Corp|GmbH|Pvt|Co\.?)?)'
+    group: 1
+
+  ship_to_address:
+    description: Delivery / ship-to address block (first line captured)
+    pattern: '(?i)(?:ship\s*to|deliver\s*to|delivery\s*address)[\s:]*([^\n]{5,120})'
+    group: 1
+
+  requisition_number:
+    description: Internal requisition / PR number
+    pattern: '(?i)(?:requisition\s*(?:number|no\.?|#)|req\.?\s*(?:number|no\.?|#)?)[\s:]*([\w\-/]{2,20})'
+    group: 1
+
+  approved_by:
+    description: Name of person who approved the PO
+    pattern: '(?i)(?:approved\s*by|authorised\s*by|authorized\s*by)[\s:]*([A-Za-z][A-Za-z\s\.\-]{2,50})'
+    group: 1
+
+  payment_terms:
+    description: Payment terms
+    pattern: '(?i)(?:payment\s*terms?|terms?)[\s:]*([A-Za-z0-9\s/\-]{2,40})'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - po_number
+  - order_date
+  - total_value
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - delivery_date
+  - vendor_name
+  - ship_to_address
+  - requisition_number
+  - approved_by
+  - payment_terms

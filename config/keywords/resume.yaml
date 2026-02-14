@@ -1,0 +1,174 @@
+# ==============================================================================
+# Keyword Dictionary: Resume / CV
+# ==============================================================================
+# Professional document submitted by a job candidate summarising their
+# work history, education, skills, and qualifications.
+#
+# Covers: Chronological resumes, functional resumes, CVs, LinkedIn exports,
+#         bio-data forms.
+# Does NOT cover: Cover letters (narrative, lacks structured sections),
+#                 Employee performance reviews, Job descriptions.
+# ==============================================================================
+
+category: resume
+display_name: Resume / CV
+description: >
+  Candidate-submitted document presenting work experience, education,
+  skills, and contact information for employment consideration.
+
+confidence_threshold: 0.60
+
+scoring:
+  primary_weight: 2
+  secondary_weight: 1
+  min_primary_matches: 3
+
+# ---------------------------------------------------------------------------
+# Primary Keywords
+# ---------------------------------------------------------------------------
+primary_keywords:
+  - resume
+  - curriculum vitae
+  - cv
+  - work experience
+  - professional experience
+  - employment history
+  - career summary
+  - professional summary
+  - objective
+  - career objective
+  - education
+  - academic background
+  - qualifications
+  - skills
+  - technical skills
+  - core competencies
+  - references available
+  - references upon request
+
+# ---------------------------------------------------------------------------
+# Secondary Keywords
+# ---------------------------------------------------------------------------
+secondary_keywords:
+  - linkedin
+  - github
+  - portfolio
+  - contact information
+  - email
+  - phone
+  - mobile
+  - address
+  - city
+  - job title
+  - position
+  - company
+  - employer
+  - dates of employment
+  - responsibilities
+  - achievements
+  - accomplishments
+  - promoted
+  - managed
+  - led
+  - developed
+  - degree
+  - bachelor
+  - master
+  - mba
+  - phd
+  - diploma
+  - university
+  - college
+  - institute
+  - gpa
+  - cgpa
+  - certifications
+  - certified
+  - licenses
+  - training
+  - publications
+  - awards
+  - honors
+  - volunteer
+  - languages spoken
+  - hobbies
+  - interests
+  - projects
+
+# ---------------------------------------------------------------------------
+# Exclusion Keywords
+# ---------------------------------------------------------------------------
+exclusion_keywords:
+  - invoice
+  - purchase order
+  - this agreement
+  - bank statement
+  - account number
+  - balance
+  - job description
+  - job posting
+  - we are looking for
+  - responsibilities include
+
+# ---------------------------------------------------------------------------
+# Regex Patterns
+# ---------------------------------------------------------------------------
+regex_patterns:
+
+  candidate_name:
+    description: Full name of the candidate (typically the first prominent line)
+    pattern: '^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})'
+    group: 1
+
+  email:
+    description: Email address
+    pattern: '([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})'
+    group: 1
+
+  phone:
+    description: Phone / mobile number
+    pattern: '(\+?\d{1,3}[\s\-\.]?)?\(?\d{3}\)?[\s\-\.]?\d{3}[\s\-\.]?\d{4}'
+    group: 0   # Full match (no sub-group)
+
+  linkedin_url:
+    description: LinkedIn profile URL
+    pattern: '(?i)((?:https?://)?(?:www\.)?linkedin\.com/in/[\w\-]+)'
+    group: 1
+
+  github_url:
+    description: GitHub profile URL
+    pattern: '(?i)((?:https?://)?(?:www\.)?github\.com/[\w\-]+)'
+    group: 1
+
+  current_title:
+    description: Most recent or current job title
+    pattern: '(?i)(?:current\s*(?:position|title|role)|position\s*applied\s*for|title)[\s:]*([A-Za-z][A-Za-z\s,/\-&]{3,80})'
+    group: 1
+
+  highest_degree:
+    description: Highest academic qualification mentioned
+    pattern: '(?i)(Ph\.?D\.?|Doctorate|Master(?:''s)?|M\.B\.A\.?|M\.S\.?|M\.A\.?|B\.(?:Tech|Eng|Sc|A|Com|Ed)\.?|Bachelor(?:''s)?|Diploma|Associate(?:''s)?)'
+    group: 1
+
+  years_of_experience:
+    description: Total years of experience (if explicitly stated)
+    pattern: '(?i)(\d{1,2})\+?\s*years?\s*(?:of\s*)?(?:experience|exp\.?)'
+    group: 1
+
+# ---------------------------------------------------------------------------
+# Mandatory Fields
+# ---------------------------------------------------------------------------
+mandatory_fields:
+  - email
+
+# ---------------------------------------------------------------------------
+# Optional Fields
+# ---------------------------------------------------------------------------
+optional_fields:
+  - candidate_name
+  - phone
+  - linkedin_url
+  - github_url
+  - current_title
+  - highest_degree
+  - years_of_experience

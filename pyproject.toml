@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "autonomus-doc-intel-engine"
+version = "0.1.0"
+description = "Autonomous Document Intelligence Engine — Python-first hybrid extraction with LLM fallback"
+requires-python = ">=3.12"
+dependencies = [
+    # --- Document Parsing ---
+    "docling[rapidocr]>=2.0",          # Layout-aware PDF/DOCX/PPTX/image → Markdown; RapidOCR for scanned docs
+
+    # --- Workflow Orchestration ---
+    "langgraph>=0.2",                   # Stateful agentic pipeline
+    "langchain-core>=0.3",             # LangGraph dependency
+
+    # --- Schema Validation ---
+    "pydantic>=2.0",                    # Extracted field validation (v2 — breaking change from v1)
+
+    # --- Configuration ---
+    "pyyaml>=6.0",                      # YAML keyword dictionary loading
+    "python-dotenv>=1.0",              # .env loading for API keys and paths
+
+    # --- REST API ---
+    "fastapi>=0.115",                   # POST /process endpoint
+    "uvicorn[standard]>=0.30",         # ASGI server
+
+    # --- LLM Fallback ---
+    "langchain-community>=0.3",        # Ollama integration
+    "ibm-watsonx-ai>=1.0",             # IBM Watsonx (Granite-3.0-8b)
+
+    # --- Business UI ---
+    "chainlit>=2.0",                    # Stakeholder transparency dashboard
+
+    # --- QE UI ---
+    "gradio>=5.0",                      # Technical validation and feedback harness
+
+    # --- Storage ---
+    "sqlalchemy>=2.0",                  # SQLite (Phase 1) / PostgreSQL (Phase 2) ORM
+    "aiosqlite>=0.20",                  # Async SQLite driver for SQLAlchemy
+
+    # --- Utilities ---
+    "aiofiles>=23.0",                   # Async file I/O for audit log writer
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",                      # FastAPI test client
+    "deepdiff>=7.0",                    # Extraction output diff vs expected fixtures
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
