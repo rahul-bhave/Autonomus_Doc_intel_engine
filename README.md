@@ -63,7 +63,7 @@ Document classification and metadata extraction rely **primarily on Python-based
 
 | ID | Requirement | Description | Priority |
 |----|-------------|-------------|----------|
-| FR1 | Structural Parsing | Use Docling to convert documents into structured Markdown, preserving hierarchical relationships (tables, headers, lists). Supported input formats: PDF, DOCX, PPTX, images (via OCR). | High |
+| FR1 | Structural Parsing | Use Docling to convert documents into structured Markdown, preserving hierarchical relationships (tables, headers, lists). Supported input formats: PDF, DOCX, PPTX, images. For digital PDFs, text is extracted directly (no OCR). For scanned PDFs and image files, Docling's selective OCR mode is used via a configured OCR engine (RapidOCR recommended). | High |
 | FR2 | Python Keyword Classification | Implement a "Deterministic First" node in LangGraph using Python keyword search, regex, and domain-specific rule sets as the **primary** mechanism for document classification and metadata extraction. | High |
 | FR3 | LLM Semantic Fallback | Deploy Granite-3.0-8b-Instruct (via Watsonx/Ollama) or Llama 3.1 (via Ollama) **only** when deterministic logic fails to produce a classification at or above the configured confidence threshold. LLM invocation must be logged with an explicit escalation reason. | High |
 | FR4 | Schema Validation | Use Pydantic models to validate all extracted JSON objects against defined domain schemas. Invalid extractions must be flagged with a structured error report and must never be silently passed downstream. | High |
@@ -129,7 +129,8 @@ Target audience: quality engineering, security, and technical review teams.
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Document Parsing | Docling | Layout-aware conversion of PDF/DOCX/PPTX/images to structured Markdown |
+| Document Parsing | Docling | Layout-aware conversion of PDF/DOCX/PPTX/images to structured Markdown. Supports selective OCR (default) and full-page OCR for scanned documents. |
+| OCR Engine | RapidOCR | Pluggable OCR backend used by Docling for scanned PDFs and image-only documents. Pure Python, ONNX Runtime-based — **no system binary installation required, works on Windows**. Digital PDFs with embedded text bypass OCR entirely. |
 | Workflow Orchestration | LangGraph | Stateful multi-step agentic pipeline with explicit state transitions |
 | Primary Classification | Python — keyword search, regex, rule engine | Deterministic document classification and metadata extraction |
 | LLM Fallback | Granite-3.0-8b (IBM Watsonx) / Llama 3.1 (Ollama) | Semantic inference when Python logic is insufficient |
@@ -137,6 +138,12 @@ Target audience: quality engineering, security, and technical review teams.
 | Business UI | Chainlit | Stakeholder-facing demo and reasoning transparency dashboard |
 | QE UI | Gradio | Technical validation, adversarial testing, and feedback collection harness |
 | Debug / Diff | DeepDiff | Development-time comparison of extraction outputs against expected fixtures |
+
+> **OCR setup (Windows):** RapidOCR is the selected engine — pure Python, no system binaries required.
+> ```bash
+> pip install "docling[rapidocr]"
+> ```
+> This pulls in `rapidocr-onnxruntime` and `onnxruntime` only. No `.exe` installer or C compiler needed.
 
 ---
 
