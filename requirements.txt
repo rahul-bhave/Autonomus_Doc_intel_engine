@@ -1,0 +1,41 @@
+# ==============================================================================
+# Autonomous Document Intel Engine — Python Dependencies
+# ==============================================================================
+# Install:  pip install -r requirements.txt
+# Dev:      pip install -r requirements-dev.txt
+# ==============================================================================
+
+# --- Document Parsing (Sprint 1) ---
+docling[rapidocr]>=2.0         # Layout-aware PDF/DOCX/PPTX/image → Markdown + RapidOCR
+
+# --- Schema Validation (Sprint 0) ---
+pydantic>=2.0                   # Extracted field validation (Pydantic v2)
+
+# --- Configuration (Sprint 0) ---
+pyyaml>=6.0                     # YAML keyword dictionary loading
+python-dotenv>=1.0              # .env loading for API keys and paths
+
+# --- Workflow Orchestration (Sprint 3) ---
+langgraph>=0.2                  # Stateful agentic pipeline
+langchain-core>=0.3             # LangGraph dependency
+
+# --- REST API (Sprint 5) ---
+fastapi>=0.115                  # POST /process endpoint
+uvicorn[standard]>=0.30         # ASGI server
+
+# --- LLM Fallback (Sprint 6) ---
+langchain-community>=0.3        # Ollama integration
+ibm-watsonx-ai>=1.0             # IBM Watsonx (Granite-3.0-8b)
+
+# --- Business UI (Sprint 7) ---
+chainlit>=2.0                   # Stakeholder transparency dashboard
+
+# --- QE UI (Sprint 8) ---
+gradio>=5.0                     # Technical validation and feedback harness
+
+# --- Storage (Sprint 4+) ---
+sqlalchemy>=2.0                 # SQLite (Phase 1) / PostgreSQL (Phase 2) ORM
+aiosqlite>=0.20                 # Async SQLite driver for SQLAlchemy
+
+# --- Utilities (Sprint 4+) ---
+aiofiles>=23.0                  # Async file I/O for audit log writer

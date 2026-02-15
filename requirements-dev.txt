@@ -1,0 +1,14 @@
+# ==============================================================================
+# Dev / Test Dependencies
+# ==============================================================================
+# Install:  pip install -r requirements-dev.txt
+# (includes all production dependencies automatically)
+# ==============================================================================
+
+-r requirements.txt
+
+pytest>=8.0                     # Test runner
+pytest-asyncio>=0.24            # Async test support
+httpx>=0.27                     # FastAPI test client
+deepdiff>=7.0                   # Extraction output diff vs expected fixtures
+fpdf2>=2.8                      # Generate synthetic test PDF fixtures
