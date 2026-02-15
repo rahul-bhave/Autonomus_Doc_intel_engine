@@ -135,3 +135,93 @@ class TestMarkdownQuality:
     def test_output_is_string(self, invoice_bytes):
         result = parse_node({"file_bytes": invoice_bytes, "source_filename": "invoice_digital.pdf"})
         assert isinstance(result["parsed_markdown"], str)
+
+
+# ---------------------------------------------------------------------------
+# File validation tests
+# ---------------------------------------------------------------------------
+
+
+class TestFileValidation:
+    """Tests for file extension blocking and MIME-type detection in parse_node."""
+
+    @pytest.mark.parametrize("ext", [
+        ".exe", ".dll", ".bat", ".cmd", ".com",
+        ".msi", ".scr", ".ps1", ".sh", ".vbs", ".js",
+    ])
+    def test_blocked_extension_returns_error(self, ext):
+        """Every blocked extension should produce a parse_error immediately."""
+        result = parse_node({
+            "file_bytes": b"fake content",
+            "source_filename": f"malicious{ext}",
+        })
+        assert "parse_error" in result
+        assert "dangerous extension" in result["parse_error"]
+        assert ext in result["parse_error"]
+        assert "parsed_markdown" not in result
+
+    def test_blocked_extension_case_insensitive(self):
+        """Blocked extension check should be case-insensitive."""
+        result = parse_node({
+            "file_bytes": b"fake content",
+            "source_filename": "malware.EXE",
+        })
+        assert "parse_error" in result
+        assert "dangerous extension" in result["parse_error"]
+
+    def test_pdf_extension_allowed(self, invoice_bytes):
+        """A .pdf file should pass validation and reach Docling."""
+        result = parse_node({
+            "file_bytes": invoice_bytes,
+            "source_filename": "invoice_digital.pdf",
+        })
+        assert "parsed_markdown" in result
+        assert "parse_error" not in result
+
+    def test_unknown_extension_with_pdf_content(self, invoice_bytes):
+        """A file with unknown extension but PDF magic bytes should be allowed."""
+        result = parse_node({
+            "file_bytes": invoice_bytes,
+            "source_filename": "document.user1",
+        })
+        assert "parsed_markdown" in result
+        assert "parse_error" not in result
+
+    def test_unknown_extension_with_unrecognized_content(self):
+        """A file with unknown extension and unrecognizable content should be rejected."""
+        result = parse_node({
+            "file_bytes": b"this is just plain text with no magic bytes",
+            "source_filename": "readme.user1",
+        })
+        assert "parse_error" in result
+        assert "unknown extension" in result["parse_error"]
+        assert "parsed_markdown" not in result
+
+    def test_unknown_extension_with_unsupported_mime(self):
+        """A file with unknown extension and a detected but unsupported MIME should be rejected."""
+        # MP3 file magic bytes (ID3 tag)
+        mp3_header = b"ID3" + b"\x04\x00" + b"\x00" * 5 + b"\x00" * 100
+        result = parse_node({
+            "file_bytes": mp3_header,
+            "source_filename": "audio.user1",
+        })
+        assert "parse_error" in result
+        assert "unsupported content type" in result["parse_error"]
+        assert "parsed_markdown" not in result
+
+    def test_no_extension_with_pdf_content(self, invoice_bytes):
+        """A file with no extension at all but valid PDF content should be allowed."""
+        result = parse_node({
+            "file_bytes": invoice_bytes,
+            "source_filename": "document",
+        })
+        assert "parsed_markdown" in result
+
+    def test_double_extension_blocked(self):
+        """A file like 'report.pdf.exe' should be blocked (final extension matters)."""
+        result = parse_node({
+            "file_bytes": b"fake",
+            "source_filename": "report.pdf.exe",
+        })
+        assert "parse_error" in result
+        assert "dangerous extension" in result["parse_error"]

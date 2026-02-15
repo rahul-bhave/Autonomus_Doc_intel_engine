@@ -32,7 +32,77 @@ from docling.datamodel.base_models import ConversionStatus, DocumentStream, Inpu
 from docling.datamodel.pipeline_options import PdfPipelineOptions, RapidOcrOptions
 from docling.document_converter import DocumentConverter, PdfFormatOption
 
+import filetype
+
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# File validation constants
+# ---------------------------------------------------------------------------
+
+BLOCKED_EXTENSIONS: frozenset[str] = frozenset({
+    ".exe", ".dll", ".bat", ".cmd", ".com", ".msi",
+    ".scr", ".ps1", ".sh", ".vbs", ".js",
+})
+
+KNOWN_GOOD_EXTENSIONS: frozenset[str] = frozenset({
+    ".pdf", ".docx", ".pptx", ".png", ".jpg", ".jpeg", ".tiff", ".tif",
+})
+
+SUPPORTED_MIME_TYPES: frozenset[str] = frozenset({
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/zip",
+    "image/png",
+    "image/jpeg",
+    "image/tiff",
+})
+
+
+def _validate_file(filename: str, file_bytes: bytes) -> Optional[str]:
+    """
+    Validate file extension and content type before parsing.
+
+    Returns None if the file is acceptable, or an error message string
+    if the file should be rejected.
+    """
+    ext = Path(filename).suffix.lower()
+
+    # Layer 1: Block dangerous extensions immediately
+    if ext in BLOCKED_EXTENSIONS:
+        logger.warning("Blocked dangerous file extension: '%s' (%s)", filename, ext)
+        return f"File rejected: dangerous extension '{ext}' is not allowed"
+
+    # Layer 2: Known good extensions — proceed directly to Docling
+    if ext in KNOWN_GOOD_EXTENSIONS:
+        return None
+
+    # Layer 3: Unknown extension — inspect content via magic bytes
+    kind = filetype.guess(file_bytes)
+    if kind is None:
+        logger.warning(
+            "Unknown file type for '%s': no MIME type detected from content", filename,
+        )
+        return (
+            f"File rejected: unknown extension '{ext}' "
+            f"and content type could not be determined"
+        )
+
+    detected_mime = kind.mime
+    if detected_mime in SUPPORTED_MIME_TYPES:
+        logger.info(
+            "Unknown extension '%s' for '%s', but detected supported MIME type: %s",
+            ext, filename, detected_mime,
+        )
+        return None
+
+    logger.warning(
+        "File rejected: '%s' has unknown extension '%s' and unsupported MIME type '%s'",
+        filename, ext, detected_mime,
+    )
+    return f"File rejected: unsupported content type '{detected_mime}' (extension: '{ext}')"
+
 
 # ---------------------------------------------------------------------------
 # Module-level converter singleton (expensive init — do once)
@@ -83,6 +153,11 @@ def parse_node(state: dict[str, Any]) -> dict[str, Any]:
 
     if not file_bytes:
         return {"parse_error": f"No file bytes provided for '{filename}'"}
+
+    # File validation guard — block dangerous extensions and unknown types
+    validation_error = _validate_file(filename, file_bytes)
+    if validation_error:
+        return {"parse_error": validation_error}
 
     try:
         converter = _get_converter()
