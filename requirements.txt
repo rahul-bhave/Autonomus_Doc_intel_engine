@@ -28,8 +28,7 @@ fastapi>=0.115                  # POST /process endpoint
 uvicorn[standard]>=0.30         # ASGI server
 
 # --- LLM Fallback (Sprint 6) ---
-langchain-community>=0.3        # Ollama integration
-ibm-watsonx-ai>=1.0             # IBM Watsonx (Granite-3.0-8b)
+anthropic>=0.40                  # Anthropic Claude API (Haiku fallback classifier)
 
 # --- Business UI (Sprint 7) ---
 chainlit>=2.0                   # Stakeholder transparency dashboard

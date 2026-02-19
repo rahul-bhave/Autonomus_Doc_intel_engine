@@ -2,7 +2,7 @@
 
 ## Project Summary
 Document intelligence platform. Python keyword search is the PRIMARY classifier.
-LLM (Ollama / IBM Watsonx) is FALLBACK ONLY, invoked when confidence < threshold.
+LLM (Anthropic Claude API) is FALLBACK ONLY, invoked when confidence < threshold.
 Pipeline: parse → classify → validate → audit → output (LangGraph StateGraph).
 
 ## Current Sprint Status
@@ -14,7 +14,7 @@ Pipeline: parse → classify → validate → audit → output (LangGraph StateG
 | S3 | LangGraph pipeline wiring | ⬜ NEXT |
 | S4 | Pydantic validation + audit log nodes | ⬜ |
 | S5 | FastAPI REST API | ⬜ |
-| S6 | LLM fallback (Ollama → Watsonx) | ⬜ |
+| S6 | LLM fallback (Anthropic Claude API) | ✅ DONE |
 | S7 | Chainlit UI | ⬜ |
 | S8 | Gradio QE UI + feedback loop | ⬜ |
 
@@ -25,7 +25,7 @@ Pipeline: parse → classify → validate → audit → output (LangGraph StateG
 - No binary installations allowed (OCR = RapidOCR, pure Python)
 
 ## Installed in .venv
-pydantic, pyyaml, python-dotenv, pytest, docling[rapidocr], fpdf2, filetype
+pydantic, pyyaml, python-dotenv, pytest, docling[rapidocr], fpdf2, filetype, watchdog, anthropic
 NOT YET: langgraph, langchain-core, fastapi, chainlit, gradio, sqlalchemy
 
 ## Windows Workaround
@@ -41,7 +41,7 @@ NOT YET: langgraph, langchain-core, fastapi, chainlit, gradio, sqlalchemy
 ## Key Architecture Rules
 - parse_node: 3-layer file validation (blocked extensions → known-good → magic-byte MIME detection via `filetype`) then Docling converts bytes → Markdown string (in-memory, not persisted unless DEBUG_PERSIST_MARKDOWN=true)
 - classify_node: runs KeywordClassifier; if confidence < threshold sets llm_escalation_reason
-- llm_fallback_node: Ollama first, Watsonx second, 2 retries with backoff; sets llm_unavailable on failure
+- llm_fallback_node: Anthropic Claude API (Haiku), 2 retries with exponential backoff; sets llm_unavailable on failure
 - validate_node: checks mandatory_fields presence + Pydantic validation; never silently passes invalid
 - audit_node: append-only JSONL write (logs/audit.jsonl); every document gets exactly one entry
 
@@ -64,7 +64,10 @@ NOT YET: langgraph, langchain-core, fastapi, chainlit, gradio, sqlalchemy
 - src/config/loader.py        — KeywordConfigLoader (hot-reload), load_categories()
 - src/pipeline/state.py       — PipelineState TypedDict
 - config/keywords/            — 7 YAML keyword dicts + categories.yaml index
-- src/pipeline/nodes/parse.py  — parse_node() (Docling PDF→Markdown + file validation, 31 tests)
+- src/pipeline/nodes/parse.py  — parse_node() (Docling PDF→Markdown + file validation + metadata extraction)
+- src/pipeline/nodes/llm.py   — llm_fallback_node() (Anthropic Claude API, retry + graceful degradation)
+- src/metadata/extractor.py   — extract_metadata() (filesystem + PDF/DOCX/PPTX internal metadata)
+- src/watcher.py              — DirectoryWatcher (watchdog, monitors data/input/)
 - src/classifiers/engine.py   — KeywordClassifier (deterministic scoring, 27 tests)
 - tests/test_config.py        — 72 passing Sprint 0 tests
 - tests/test_parse.py         — 31 passing tests (13 parse + 18 file validation)
