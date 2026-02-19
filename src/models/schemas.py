@@ -15,6 +15,49 @@ from pydantic import BaseModel, Field, field_validator
 
 
 # ---------------------------------------------------------------------------
+# Document metadata: filesystem + document-internal properties
+# ---------------------------------------------------------------------------
+
+class DocumentMetadata(BaseModel):
+    """
+    Metadata extracted from a document file before parsing.
+    Combines filesystem attributes and document-internal properties.
+    """
+
+    # Filesystem metadata
+    file_size_bytes: int = 0
+    """File size in bytes."""
+
+    file_extension: str = ""
+    """Lowercase file extension including dot, e.g. '.pdf'."""
+
+    mime_type: Optional[str] = None
+    """MIME type detected via magic bytes (filetype library)."""
+
+    created_at: Optional[datetime] = None
+    """File creation timestamp (from filesystem). None if unavailable."""
+
+    modified_at: Optional[datetime] = None
+    """File last-modified timestamp (from filesystem). None if unavailable."""
+
+    # Document-internal metadata
+    page_count: Optional[int] = None
+    """Number of pages (PDF/PPTX). None for unsupported formats."""
+
+    author: Optional[str] = None
+    """Document author from internal metadata. None if not present."""
+
+    title: Optional[str] = None
+    """Document title from internal metadata. None if not present."""
+
+    producer: Optional[str] = None
+    """PDF producer / application that created the document."""
+
+    creation_date: Optional[str] = None
+    """Document creation date from internal metadata (raw string)."""
+
+
+# ---------------------------------------------------------------------------
 # Intermediate: output of the keyword classifier node
 # ---------------------------------------------------------------------------
 

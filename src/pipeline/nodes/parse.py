@@ -34,6 +34,8 @@ from docling.document_converter import DocumentConverter, PdfFormatOption
 
 import filetype
 
+from src.metadata.extractor import extract_metadata
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -159,6 +161,15 @@ def parse_node(state: dict[str, Any]) -> dict[str, Any]:
     if validation_error:
         return {"parse_error": validation_error}
 
+    # Extract document metadata (filesystem + internal properties)
+    source_path = state.get("source_path")
+    try:
+        metadata = extract_metadata(file_bytes, filename, source_path)
+        metadata_dict = metadata.model_dump(mode="json")
+    except Exception as exc:
+        logger.warning("Metadata extraction failed for '%s': %s", filename, exc)
+        metadata_dict = {}
+
     try:
         converter = _get_converter()
 
@@ -169,7 +180,10 @@ def parse_node(state: dict[str, Any]) -> dict[str, Any]:
         if result.status == ConversionStatus.SUCCESS:
             markdown = result.document.export_to_markdown()
             logger.info("Parsed '%s' successfully (%d chars)", filename, len(markdown))
-            output: dict[str, Any] = {"parsed_markdown": markdown}
+            output: dict[str, Any] = {
+                "parsed_markdown": markdown,
+                "document_metadata": metadata_dict,
+            }
 
             # Optionally persist Markdown to disk for debugging
             if os.environ.get("DEBUG_PERSIST_MARKDOWN", "").lower() == "true":
@@ -184,7 +198,10 @@ def parse_node(state: dict[str, Any]) -> dict[str, Any]:
                 "Partial conversion for '%s' (%d chars, %d warnings): %s",
                 filename, len(markdown), len(warnings), warnings,
             )
-            output = {"parsed_markdown": markdown}
+            output = {
+                "parsed_markdown": markdown,
+                "document_metadata": metadata_dict,
+            }
 
             if os.environ.get("DEBUG_PERSIST_MARKDOWN", "").lower() == "true":
                 _persist_markdown(state.get("document_id", "unknown"), markdown)
@@ -195,11 +212,17 @@ def parse_node(state: dict[str, Any]) -> dict[str, Any]:
             # FAILURE or SKIPPED
             error_msgs = "; ".join(e.error_message for e in result.errors) or "Unknown conversion error"
             logger.error("Conversion failed for '%s': %s", filename, error_msgs)
-            return {"parse_error": f"Docling conversion failed: {error_msgs}"}
+            return {
+                "parse_error": f"Docling conversion failed: {error_msgs}",
+                "document_metadata": metadata_dict,
+            }
 
     except Exception as exc:
         logger.exception("Unexpected error parsing '%s'", filename)
-        return {"parse_error": f"Unexpected parse error: {exc}"}
+        return {
+            "parse_error": f"Unexpected parse error: {exc}",
+            "document_metadata": metadata_dict,
+        }
 
 
 # ---------------------------------------------------------------------------

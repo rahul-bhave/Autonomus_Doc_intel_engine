@@ -39,6 +39,18 @@ class PipelineState(TypedDict, total=False):
     """Unix timestamp in ms when the pipeline was invoked. Used for duration calc."""
 
     # ------------------------------------------------------------------
+    # Pre-parse: document metadata
+    # ------------------------------------------------------------------
+    document_metadata: dict[str, Any]
+    """
+    Serialised DocumentMetadata dict — filesystem + document-internal properties.
+    Populated by the metadata extractor before or during parse.
+    """
+
+    source_path: Optional[str]
+    """Absolute path to the source file on disk (set by watcher or API)."""
+
+    # ------------------------------------------------------------------
     # Stage 1: parse node output
     # ------------------------------------------------------------------
     parsed_markdown: str
