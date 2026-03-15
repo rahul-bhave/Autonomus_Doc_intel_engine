@@ -159,15 +159,32 @@ class TestClassifyNode:
 
 
 # ---------------------------------------------------------------------------
-# validate_node Tests (pass-through stub)
+# validate_node Tests (S4 real implementation)
 # ---------------------------------------------------------------------------
 
 
 class TestValidateNode:
-    """Tests for the Sprint 3 pass-through validate_node."""
+    """Smoke tests for validate_node in the pipeline context (S4 real implementation).
 
-    def test_returns_valid_on_normal_state(self):
+    Comprehensive unit tests live in tests/test_validate.py.
+    """
+
+    def test_returns_partial_when_invoice_fields_missing(self):
+        """Invoice with empty extracted_fields → partial (mandatory fields absent)."""
         state = {"document_category": "invoice", "extracted_fields": {}}
+        result = validate_node(state)
+        assert result["validation_status"] == "partial"
+        assert len(result["validation_errors"]) > 0
+
+    def test_returns_valid_when_all_mandatory_fields_present(self):
+        state = {
+            "document_category": "invoice",
+            "extracted_fields": {
+                "invoice_number": "INV-001",
+                "invoice_date": "2024-03-15",
+                "total_amount": "962.50",
+            },
+        }
         result = validate_node(state)
         assert result["validation_status"] == "valid"
         assert result["validation_errors"] == []
@@ -180,21 +197,26 @@ class TestValidateNode:
 
 
 # ---------------------------------------------------------------------------
-# audit_node Tests (pass-through stub)
+# audit_node Tests (S4 real implementation)
 # ---------------------------------------------------------------------------
 
 
 class TestAuditNode:
-    """Tests for the Sprint 3 pass-through audit_node."""
+    """Smoke tests for audit_node in the pipeline context (S4 real implementation).
 
-    def test_returns_audit_id(self):
+    Comprehensive unit tests live in tests/test_audit.py.
+    """
+
+    def test_returns_audit_id(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("AUDIT_LOG_PATH", str(tmp_path / "audit.jsonl"))
         result = audit_node({})
         assert "audit_id" in result
         assert len(result["audit_id"]) > 0
 
-    def test_audit_not_written(self):
+    def test_audit_written_true_on_success(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("AUDIT_LOG_PATH", str(tmp_path / "audit.jsonl"))
         result = audit_node({})
-        assert result["audit_written"] is False
+        assert result["audit_written"] is True
 
 
 # ---------------------------------------------------------------------------

@@ -12,8 +12,8 @@ Pipeline: parse → classify → validate → audit → output (LangGraph StateG
 | S1 | Docling parse node | ✅ DONE |
 | S2 | Python keyword classifier engine | ✅ DONE |
 | S3 | LangGraph pipeline wiring | ✅ DONE |
-| S4 | Pydantic validation + audit log nodes | ⬜ NEXT |
-| S5 | FastAPI REST API | ⬜ |
+| S4 | Pydantic validation + audit log nodes | ✅ DONE |
+| S5 | FastAPI REST API | ⬜ NEXT |
 | S6 | LLM fallback (Anthropic Claude API) | ✅ DONE |
 | S7 | Chainlit UI (doc upload + API key input + pipeline visualization) | ⬜ |
 | S8 | Gradio QE UI (doc upload + API key input + feedback loop) | ⬜ |
@@ -32,10 +32,11 @@ NOT YET: fastapi, chainlit, gradio, sqlalchemy
 - `parse.py` patches `huggingface_hub.file_download.are_symlinks_supported` → `False` on Windows
 - Avoids `OSError: [WinError 1314]` symlink error without needing Developer Mode
 
-## Sprint 4 — Next Steps
-1. Implement `validate_node` — mandatory_fields check + Pydantic validation per category
-2. Implement `audit_node` — append-only JSONL writer using AuditEntry schema
-3. Write `tests/test_validate.py` and `tests/test_audit.py`
+## Sprint 5 — Next Steps
+1. Install `fastapi` and `uvicorn[standard]` into `.venv`
+2. Implement `src/api/server.py` — `POST /process` (file upload → pipeline → ExtractedDocument JSON) and `GET /health`
+3. Add `src/api/main.py` as Uvicorn entrypoint
+4. Write `tests/test_api.py` using FastAPI `TestClient`
 
 ## Key Architecture Rules
 - parse_node: 3-layer file validation (blocked extensions → known-good → magic-byte MIME detection via `filetype`) then Docling converts bytes → Markdown string (in-memory, not persisted unless DEBUG_PERSIST_MARKDOWN=true)
@@ -74,8 +75,8 @@ NOT YET: fastapi, chainlit, gradio, sqlalchemy
 - src/pipeline/nodes/parse.py  — parse_node() (Docling PDF→Markdown + file validation + metadata extraction)
 - src/pipeline/nodes/classify.py — classify_node() (KeywordClassifier wiring + field extraction)
 - src/pipeline/nodes/llm.py   — llm_fallback_node() (Anthropic Claude API, retry + graceful degradation)
-- src/pipeline/nodes/validate.py — validate_node() (pass-through stub, full in S4)
-- src/pipeline/nodes/audit.py — audit_node() (pass-through stub, full in S4)
+- src/pipeline/nodes/validate.py — validate_node() (mandatory_fields check → valid/partial/invalid)
+- src/pipeline/nodes/audit.py — audit_node() (append-only JSONL writer, AuditEntry schema)
 - src/pipeline/nodes/output.py — output_node() (assembles final ExtractedDocument dict)
 - src/pipeline/graph.py       — build_graph(), run_pipeline(), route_after_classify()
 - src/metadata/extractor.py   — extract_metadata() (filesystem + PDF/DOCX/PPTX internal metadata)
@@ -84,7 +85,9 @@ NOT YET: fastapi, chainlit, gradio, sqlalchemy
 - tests/test_config.py        — 72 passing Sprint 0 tests
 - tests/test_parse.py         — 31 passing tests (13 parse + 18 file validation)
 - tests/test_classifier.py    — 27 passing Sprint 2 tests
-- tests/test_pipeline.py      — 22 passing Sprint 3 tests (graph, routing, classify, e2e)
+- tests/test_validate.py      — Sprint 4 validate_node tests (valid/partial/invalid paths, real categories)
+- tests/test_audit.py         — Sprint 4 audit_node tests (JSONL write, outcome mapping, IO resilience)
+- tests/test_pipeline.py      — 22 passing Sprint 3 tests (graph, routing, classify, e2e) + S4 updates
 - tests/fixtures/documents/   — 3 test PDFs (invoice, resume, contract)
 - .github/workflows/ci.yml    — GitHub Actions CI pipeline
 - .claude/commands/            — 4 custom slash commands
